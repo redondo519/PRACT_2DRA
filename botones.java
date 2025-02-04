@@ -55,17 +55,18 @@ public class botones {
 
     //funcion crear tablero, se le pasa el numero de golpes
     public static int [][] crearTablero(int numGolpesInicio){
-
+        int  numGolpes;
         Random r = new Random();
-        numGolpesInicio = 15;
 
-        //arrray tablero de prueba 8 por 8 (Meter esto en una funcion crear tablero)
+
+        //arrray tablero 8 por 8 a CEROS
         int [][] tablero = new int[8][8];
         for(int i = 1; i  <= tablero.length -1; i++){
             for(int j = 0;  j<= tablero.length -1; j++){
                 tablero[i][j] = 0;
             }
         }
+        //suma en posiciones i,j random
         for(int i = 0; i < numGolpesInicio; i++){
             int p1 = r.nextInt(1,7);
             int p2 = r.nextInt(1,7);
@@ -99,15 +100,11 @@ public class botones {
 
         //desarrollo del programa principal
 
-
+        //INSTRUCIONES
         System.out.println("Nuevo ( N ) - Recomenzar ( R ) - Deshacer ( U ) - Salir ( S ) \n");
-        //LLamada a la funcion mostrarTablero
-        //mostrarTablero();
+        //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
 
-
-        //LLamada a la funcion muestra tablero (creatablero (num golpes nivel))
-        int n = 3;
-        mostrarTablero(crearTablero(n));
+        mostrarTablero(crearTablero(seleccionarNivel(3)));
 
 
 
