@@ -94,17 +94,59 @@ public class botones {
 
 
 
+    //funcion al pulsar  L  Cambio de nivel
+    public static int cambioNivel (char l,int nivel){
+        if(l == 'l'){
+            Scanner sc2 = new Scanner(System.in);
+            System.out.println("Introduce el nivel que quieres jugar (1-9)");
+            nivel = sc2.nextInt();
+
+        }
+        return nivel;
+    }
 
 
     public static void main(String[] args) {
 
         //desarrollo del programa principal
 
-        //INSTRUCIONES
+        //INSTRUCCIONES A
         System.out.println("Nuevo ( N ) - Recomenzar ( R ) - Deshacer ( U ) - Salir ( S ) \n");
-        //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
 
-        mostrarTablero(crearTablero(seleccionarNivel(3)));
+        //Por defecto el nivel es el 6 - Normal de 15 golpes
+        int nivel = 6;
+
+        //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
+        mostrarTablero(crearTablero(seleccionarNivel(nivel)));
+
+        //INSTRUCCIONES B
+        System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(6));      //DEVUELVA TAMBIEN "normal"
+        System.out.print("Instrucciones:\n" +
+                "\tMueva el cursor a un botón del tablero (con las flechas).\n" +
+                "\tPulse 'return'\n" +
+                "\tpara decrementar el valor de ese botón en 1,\n" +
+                "\ty también los valores de sus 4 vecinos.\n" +
+                "Objetivo:\n" +
+                "\tDejar todos los botones en '0'.");
+
+        Scanner sc = new Scanner(System.in);
+        char letra = sc.next().toLowerCase().charAt(0);
+
+       /* if(letra == 'l'){
+            Scanner sc2 = new Scanner(System.in);
+            System.out.println("Introduce el nivel que quieres jugar (1-9)");
+            nivel = sc2.nextInt();
+            seleccionarNivel(nivel);
+            //LLamada a la funcion mostrarTablero
+            mostrarTablero(crearTablero(seleccionarNivel(nivel)));
+        }
+        */
+
+        if (letra == 'l'){
+            cambioNivel(letra,nivel);
+            mostrarTablero(crearTablero(seleccionarNivel(nivel)));
+        }
+
 
 
 
