@@ -57,15 +57,20 @@ public class botones {
     public static int [][] crearTablero(int numGolpesInicio){
 
         Random r = new Random();
-
+        numGolpesInicio = 15;
 
         //arrray tablero de prueba 8 por 8 (Meter esto en una funcion crear tablero)
         int [][] tablero = new int[8][8];
-        for(int i = 0; i  <= tablero.length -1; i++){
+        for(int i = 1; i  <= tablero.length -1; i++){
             for(int j = 0;  j<= tablero.length -1; j++){
                 tablero[i][j] = 0;
-
             }
+        }
+        for(int i = 0; i < numGolpesInicio; i++){
+            int p1 = r.nextInt(1,7);
+            int p2 = r.nextInt(1,7);
+            tablero[p1][p2] ++;
+
         }
         return tablero;
 
