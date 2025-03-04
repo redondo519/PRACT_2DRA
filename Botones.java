@@ -13,6 +13,12 @@ Redondo
 public class Botones {
 
 
+    //Declaracion de variables
+    private static int numGolpes = 0;
+    private static int numCeros = 0;
+    private static int golpesPrevistos = 6;
+
+
     //Declaracion de integraciones de usuario
     public static final int LETRA_L = 0x4c; //Letra L
     public static final int LETRA_R = 0x52; //Letra R
@@ -143,34 +149,43 @@ public class Botones {
         Scanner sc = new Scanner(System.in);
         switch (selecUsuario) {
             case 1 -> { //Nivel 1: más facil "fácil"
+                golpesPrevistos = 3;
                 return 3;
             }
             case 2 -> { //Nivel 2: "iniciación"
+                golpesPrevistos = 6;
                 return 6;
-
             }
             case 3 -> { //Nivel 3: "principiante"
+                golpesPrevistos = 9;
                 return 9;
             }
             case 4 -> { //Nivel 4: "dominando"
+                golpesPrevistos = 10;
                 return 10;
             }
             case 5 -> { //Nivel 5: "avanzado"
+                golpesPrevistos = 12;
                 return 12;
             }
             case 6 -> { //Nivel normal: "normal"
+                golpesPrevistos = 15;
                 return 15;
             }
             case 7 -> { //nivel 7  "avanzado2"
+                golpesPrevistos = 18;
                 return 18;
             }
             case 8 -> { //nivel 8 "extremo"
+                golpesPrevistos = 20;
                 return 20;
             }
             case 9 -> { //nivel 9 mas dificil "casi imposible"
+                golpesPrevistos = 27;
                 return 27;
             }
             default -> {
+                golpesPrevistos = 15;
                 return 15; //Por defecto nivel normal
             }
 
@@ -181,7 +196,7 @@ public class Botones {
 
     //funcion crear tablero, se le pasa el numero de golpes
     public static int[][] crearTablero(int numGolpesInicio) {
-        int numGolpes;
+
         Random r = new Random();
 
         //arrray tablero 8 por 8 a CEROS
@@ -206,9 +221,10 @@ public class Botones {
     //Copia del tablero para poder reiniciarlo al pulsar R
     public static int[][] copiaTablero(int[][] tablero){
 
-        int[][] tableroR = new int[8][8];
+        int[][] tableroR;
         tableroR = tablero;
 
+        mostrarTablero(tableroR);
         return tableroR;
     }
 
@@ -232,8 +248,32 @@ public class Botones {
     }
 
 
+
+    //funcion letras
+    public static void llamarFuncionesLetras(String letra){
+        switch (letra) {
+            case "L"->{
+                //cambioNivel();
+            }
+            case "N"->{
+                //crearTablero(seleccionarNivel(6));
+            }
+            case "R"->{
+                //llamar al tablero copia sin modificar y mostrarle;
+            }
+            case "S"->{
+                //llamar a funcion salir
+            }
+            case "U"->{
+                //llamar a funcion deshacer
+            }
+        }
+
+    }
+
+
     //funcion al pulsar  L  Cambio de nivel
-    public static int cambioNivel() {
+    public static void cambioNivel() {
 
         int nivel;
 
@@ -241,24 +281,50 @@ public class Botones {
         System.out.println("\nIntroduce el nivel que quieres jugar (1-9)");
         compruebaTeclas();
         if (num1Pressed) {
-            nivel = 1;
+            seleccionarNivel(1);
         } else {
-            nivel = 6;
+            seleccionarNivel(6);
         }
 
-
-        return nivel;
     }
 
+    //funcion deshacer movimiento. Vuelve al tablero antes de su ultimo golpe
+    public static int[][] deshacer(int[][] tablero, int p1, int p2) {
+        //Dar un golpe positivo en la posicion dada.
+        tablero [p1][p2] ++;
+
+        //Restar a las casillas vecinas
+        tablero [p1][p2-1] --;
+        tablero [p1][p2+1] --;
+        tablero [p1-1][p2] --;
+        tablero [p1+1][p2] --;
+
+        //Comprobacion suma y resta correcta. Comprobación numero de 0s
+        for (int i = 1; i <= 6; i++) {
+            for (int j = 1; j <= 6; j++) {
+                if(tablero[i][j] == -1){
+                    tablero[i][j] = 3;
+                } else if (tablero[i][j] == 4) {
+                    tablero[i][j] = 0;
+                }
+            }
+        }
+        mostrarTablero(tablero);
+
+        return tablero;
+
+    }
 
 
 
     //Metodo dar golpe
     public static int[][] golpear(int[][] tablero, int p1, int p2) {
+
+        numGolpes ++;
         //Dar golpe en la posicion marcada con el cursor
         tablero [p1][p2] --;
 
-        //Sumar una posicion a las casillas vecinas
+        //Sumar  a las casillas vecinas
         tablero [p1][p2-1] ++;
         tablero [p1][p2+1] ++;
         tablero [p1-1][p2] ++;
@@ -271,32 +337,26 @@ public class Botones {
                     tablero[i][j] = 3;
                 } else if (tablero[i][j] == 4) {
                     tablero[i][j] = 0;
+                }else if (tablero[i][j] == 0) {
+                    numCeros++;
+                }
                 }
             }
-        }
 
+        mostrarTablero(tablero);
 
         return tablero;
     }
 
-    //Metodo contador golpes
+    //Metodo contador ceros
     public static int contadorCeros(int [][] tablero) {
-        int cantidadCeros = 0;
-
-
-        for (int i = 1; i <= 6; i++) {
-            for (int j = 1; j <= 6; j++) {
-                if (tablero[i][j] == 0) {
-                    cantidadCeros ++;
-                }
-            }
-        }
-        return cantidadCeros;
-
+        return numCeros;
     }
 
-    //Contador golpes
-
+    //Metodo Contador golpes
+    public static int contadorGolpes() {
+        return numGolpes;
+    }
 
 
 
@@ -317,7 +377,13 @@ public class Botones {
 
         if(!juego){
             //SI hizo tantos golpes
-
+            if (numGolpes == golpesPrevistos ){
+                System.out.printf("\nPerfecto. Hecho en %d golpes.\n" , numGolpes);
+            }else if(numGolpes > golpesPrevistos){
+                System.out.printf("\nHecho en %d golpes.\n" , numGolpes);
+            }else{
+                System.out.printf("\nExtraordinariamente bien: Hecho en %d golpes.\n" , numGolpes);
+            }
 
         }
 
@@ -337,16 +403,20 @@ public class Botones {
 
         //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
         int[][] tablero = crearTablero(seleccionarNivel(nivel));
+        int [][] tableroCopia = copiaTablero(tablero);
         mostrarTablero(tablero);
         System.out.println(contadorCeros(tablero));
+        //mostrarTablero(tableroCopia);
+        //System.out.println(contadorCeros(tableroCopia));
 
         //LLamar a golpear
         int pos1 = 4;
         int pos2 = 3;
         golpear(tablero, pos1, pos2);
         borrarPantalla(); // en cmd funciona
-        mostrarTablero(tablero);
+        //mostrarTablero(tablero);
         System.out.println(contadorCeros(tablero));
+        System.out.println();
 
 
         //INSTRUCCIONES B
@@ -361,7 +431,7 @@ public class Botones {
 
 
         //compruebaTeclas();
-        System.out.println(seleccionarNivel(cambioNivel()));
+
 
 
 
@@ -385,6 +455,11 @@ public class Botones {
                 break;
             }
              */
+
+
+
+
+
 
 
     }
