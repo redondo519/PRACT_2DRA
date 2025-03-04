@@ -1,7 +1,6 @@
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.User32;
-import java.io.IOException;
-import java.util.Arrays;
+
 import java.util.Random;
 import java.util.Scanner;
 
@@ -13,39 +12,38 @@ Redondo
 public class Botones {
 
 
-    //FINAL int
-    public static final  int LETRA_L = 0x4c; //Letra L
-    public static final  int LETRA_R = 0x52; //Letra R
-    public static final  int LETRA_N = 0x4e; //Letra N
-    public static final  int LETRA_S = 0x53; //Letra s
-    public static final  int LETRA_U = 0x55; //Letra U
+    //Declaracion de integraciones de usuario
+    public static final int LETRA_L = 0x4c; //Letra L
+    public static final int LETRA_R = 0x52; //Letra R
+    public static final int LETRA_N = 0x4e; //Letra N
+    public static final int LETRA_S = 0x53; //Letra s
+    public static final int LETRA_U = 0x55; //Letra U
 
-    public static final  int VK_UP = 0x26; //Tecla flecha arriba
-    public static final  int VK_DOWN = 0x28; //Tecla flecha abajo
-    public static final  int VK_LEFT = 0x25; //Tecla flecha izquierda
-    public static final  int VK_RIGHT = 0x27; //Tecla flecha derecha
-    public static final  int VK_RETURN = 0x0D;//Tecla enter
+    public static final int VK_UP = 0x26; //Tecla flecha arriba
+    public static final int VK_DOWN = 0x28; //Tecla flecha abajo
+    public static final int VK_LEFT = 0x25; //Tecla flecha izquierda
+    public static final int VK_RIGHT = 0x27; //Tecla flecha derecha
+    public static final int VK_RETURN = 0x0D;//Tecla enter
 
-    public static final  int num1 = 0x31;
-    public static final  int num2 = 0x32;
-    public static final  int num3 = 0x33;
-    public static final  int num4 = 0x34;
-    public static final  int num5 = 0x35;
-    public static final  int num6 = 0x36;
-    public static final  int num7 = 0x37;
-    public static final  int num8 = 0x38;
-    public static final  int num9 = 0x39;
+    public static final int num1 = 0x31;
+    public static final int num2 = 0x32;
+    public static final int num3 = 0x33;
+    public static final int num4 = 0x34;
+    public static final int num5 = 0x35;
+    public static final int num6 = 0x36;
+    public static final int num7 = 0x37;
+    public static final int num8 = 0x38;
+    public static final int num9 = 0x39;
 
 
-
-    //PRESSED
+    //PRESSED  Incialmente FALSE porque no se han pulsado
     private static boolean lPressed = false;
     private static boolean rPressed = false;
     private static boolean nPressed = false;
     private static boolean sPressed = false;
     private static boolean uPressed = false;
 
-    private static boolean  upPressed = false;
+    private static boolean upPressed = false;
     private static boolean downPressed = false;
     private static boolean leftPressed = false;
     private static boolean rightPressed = false;
@@ -63,16 +61,16 @@ public class Botones {
 
 
 
-
-
     //WINDOWS
-    public interface  Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
+    public interface Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
         Kernel32 INSTANCE = (Kernel32) Native.load("user32", User32.class);
 
         //Definir la funcion de windows que lee un caracter e la consola
         boolean GetAsyncKeyState(int vKey);
 
     }
+
+
 
 
     //Niveles de juego (hay 9) van en funcion de los golpes (3,6,9,10,12,15,18,20,27)
@@ -173,31 +171,62 @@ public class Botones {
 
         int nivel;
 
-            Scanner sc2 = new Scanner(System.in);
-            System.out.println("\nIntroduce el nivel que quieres jugar (1-9)");
-            compruebaTeclas();
-            if(num1Pressed){
-                nivel = 1;
-            }else{
-                nivel = 6;
-            }
+        Scanner sc2 = new Scanner(System.in);
+        System.out.println("\nIntroduce el nivel que quieres jugar (1-9)");
+        compruebaTeclas();
+        if (num1Pressed) {
+            nivel = 1;
+        } else {
+            nivel = 6;
+        }
 
 
         return nivel;
     }
 
 
-
-
     //Metodo borrar pantalla
 
     //Metodo dar golpe
+    public static int[][] golpear(int[][] tablero, int p1, int p2) {
+        //Dar golpe en la posicion marcada con el cursor
+        tablero [p1][p2] --;
+
+        //Sumar una posicion a las casillas vecinas
+            //Posicion izq
+            tablero [p1][p2-1] ++;
+            if(tablero [p1][p2-1] == -1){
+                tablero [p1][p2-1] = 3;
+            }
+            //Posicion drch
+            tablero [p1][p2+1] ++;
+            if(tablero [p1][p2+1] == 3){
+            tablero [p1][p2+1] = 0;
+            }
+            //Posiciom arrb
+            tablero [p1-1][p2] ++;
+            if(tablero [p1-1][p2] == -1){
+                tablero [p1-1][p2] = 3;
+            }
+
+            //Posicion abj
+            tablero [p1+1][p2] ++;
+            if(tablero [p1+1][p2] == 3){
+                tablero [p1+1][p2] = 0;
+            }
+
+
+
+
+        return tablero;
+    }
+
     //Metodo contador golpes
+
     //Metodo mensajes 
 
 
-
-    public static void compruebaTeclas(){
+    public static void compruebaTeclas() {
         while (true) {
 
             String opcion;
@@ -219,7 +248,7 @@ public class Botones {
             if ((User32.INSTANCE.GetAsyncKeyState(LETRA_L) & 0x8000) != 0) {
                 //Si presionamos L llamada a funcion cambio cambioNivel
                 if (!lPressed) {
-                    //cambioNivel('l');
+                    //seleccionarNivel(2);
                     opcion = "L";
                     lPressed = true; //Ya se ha presionado
                     break;
@@ -240,7 +269,7 @@ public class Botones {
             } else {
                 num1Pressed = false;  //Restablecemos al soltar la tecla
             }
-
+            break;
 
         }
     }
@@ -250,17 +279,29 @@ public class Botones {
     public static void main(String[] args) {
 
 
+        //INSTRUCCIONES A
+        System.out.println("Nuevo ( N ) - Recomenzar ( R ) - Deshacer ( U ) - Salir ( S ) \n");
 
 
-            //INSTRUCCIONES A
-            System.out.println("Nuevo ( N ) - Recomenzar ( R ) - Deshacer ( U ) - Salir ( S ) \n");
+        //Por defecto el nivel es el 6 - Normal de 15 golpes
+        int nivel = 6; // nivel se cambia con funcion cambioNivel
+
+        //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
 
 
-            //Por defecto el nivel es el 6 - Normal de 15 golpes
-            int nivel = 6; // nivel se cambia con funcion cambioNivel
+        int [] [] tablero = crearTablero(seleccionarNivel(nivel));
+        mostrarTablero(tablero);
 
-            //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
-            mostrarTablero(crearTablero(seleccionarNivel(nivel)));
+
+        //LLamar a golpear
+        int pos1 = 4;
+        int pos2 = 3;
+        golpear(tablero, pos1, pos2);
+        mostrarTablero(tablero);
+
+
+
+
 
             //INSTRUCCIONES B
             System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel));      //DEVUELVA TAMBIEN "normal"
@@ -272,7 +313,12 @@ public class Botones {
                     "Objetivo:\n" +
                     "\tDejar todos los botones en '0'.");
 
-            compruebaTeclas();
+
+
+        //compruebaTeclas();
+        System.out.println(seleccionarNivel(cambioNivel()));
+
+
 
 
 
@@ -292,10 +338,6 @@ public class Botones {
                 break;
             }
              */
-
-
-
-
 
 
 
