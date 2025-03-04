@@ -1,6 +1,7 @@
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.User32;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -71,6 +72,67 @@ public class Botones {
     }
 
 
+    //Comprueba entrada usuario
+    public static void compruebaTeclas() {
+        while (true) {
+
+            String opcion;
+
+            //Verifica si S esta presionada y aun no ha sido regristada
+            if ((User32.INSTANCE.GetAsyncKeyState(LETRA_S) & 0x8000) != 0) {
+                //Si presionamos S fin del programa
+                if (!sPressed) {
+                    System.out.println("\nGracias por jugar\nFIN DEL PROGRAMA");
+                    opcion = "S";
+                    sPressed = true; //Ya se ha presionado
+                    break;
+                }
+            } else {
+                sPressed = false;  //Restablecemos al soltar la tecla
+            }
+
+            //Verifica si L esta presionada y aun no ha sido registrada
+            if ((User32.INSTANCE.GetAsyncKeyState(LETRA_L) & 0x8000) != 0) {
+                //Si presionamos L llamada a funcion cambio cambioNivel
+                if (!lPressed) {
+                    //seleccionarNivel(2);
+                    opcion = "L";
+                    lPressed = true; //Ya se ha presionado
+                    break;
+                }
+            } else {
+                lPressed = false;  //Restablecemos al soltar la tecla
+            }
+
+            //Tecla 1
+            if ((User32.INSTANCE.GetAsyncKeyState(num1) & 0x8000) != 0) {
+                //Si presionamos 1 lleva a el nivel 1
+                if (!num1Pressed) {
+                    //seleccionarNivel(1);
+                    int nivel = 1;
+                    num1Pressed = true; //Ya se ha presionado
+
+                }
+            } else {
+                num1Pressed = false;  //Restablecemos al soltar la tecla
+            }
+            break;
+
+        }
+    }
+
+
+    //Metodo borrar pantalla
+    public static void borrarPantalla(){
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 
     //Niveles de juego (hay 9) van en funcion de los golpes (3,6,9,10,12,15,18,20,27)
@@ -122,7 +184,6 @@ public class Botones {
         int numGolpes;
         Random r = new Random();
 
-
         //arrray tablero 8 por 8 a CEROS
         int[][] tablero = new int[8][8];
         for (int i = 1; i <= tablero.length - 1; i++) {
@@ -138,16 +199,21 @@ public class Botones {
             tablero[p1][p2]++; //Golpe positivo en coordenada generada
 
         }
-        return tablero; //Devuelve tablero para mostrarTablero()
-
+        return tablero; //Devuelve tablero
 
     }
 
     //Copia del tablero para poder reiniciarlo al pulsar R
-    /*
-    public static void copiaTablero(int[][] tablero){
+    public static int[][] copiaTablero(int[][] tablero){
 
-    }*/
+        int[][] tableroR = new int[8][8];
+        tableroR = tablero;
+
+        return tableroR;
+    }
+
+
+
 
 
     //funcion mostrar tablero
@@ -185,7 +251,7 @@ public class Botones {
     }
 
 
-    //Metodo borrar pantalla
+
 
     //Metodo dar golpe
     public static int[][] golpear(int[][] tablero, int p1, int p2) {
@@ -193,85 +259,68 @@ public class Botones {
         tablero [p1][p2] --;
 
         //Sumar una posicion a las casillas vecinas
-            //Posicion izq
-            tablero [p1][p2-1] ++;
-            if(tablero [p1][p2-1] == -1){
-                tablero [p1][p2-1] = 3;
-            }
-            //Posicion drch
-            tablero [p1][p2+1] ++;
-            if(tablero [p1][p2+1] == 3){
-            tablero [p1][p2+1] = 0;
-            }
-            //Posiciom arrb
-            tablero [p1-1][p2] ++;
-            if(tablero [p1-1][p2] == -1){
-                tablero [p1-1][p2] = 3;
-            }
+        tablero [p1][p2-1] ++;
+        tablero [p1][p2+1] ++;
+        tablero [p1-1][p2] ++;
+        tablero [p1+1][p2] ++;
 
-            //Posicion abj
-            tablero [p1+1][p2] ++;
-            if(tablero [p1+1][p2] == 3){
-                tablero [p1+1][p2] = 0;
+        //Comprobacion suma y resta correcta. Comprobación numero de 0s
+        for (int i = 1; i <= 6; i++) {
+            for (int j = 1; j <= 6; j++) {
+                if(tablero[i][j] == -1){
+                    tablero[i][j] = 3;
+                } else if (tablero[i][j] == 4) {
+                    tablero[i][j] = 0;
+                }
             }
-
-
+        }
 
 
         return tablero;
     }
 
     //Metodo contador golpes
+    public static int contadorCeros(int [][] tablero) {
+        int cantidadCeros = 0;
 
-    //Metodo mensajes 
 
-
-    public static void compruebaTeclas() {
-        while (true) {
-
-            String opcion;
-
-            //Verifica si S esta presionada y aun no ha sido regristada
-            if ((User32.INSTANCE.GetAsyncKeyState(LETRA_S) & 0x8000) != 0) {
-                //Si presionamos S fin del programa
-                if (!sPressed) {
-                    System.out.println("\nGracias por jugar\nFIN DEL PROGRAMA");
-                    opcion = "S";
-                    sPressed = true; //Ya se ha presionado
-                    break;
+        for (int i = 1; i <= 6; i++) {
+            for (int j = 1; j <= 6; j++) {
+                if (tablero[i][j] == 0) {
+                    cantidadCeros ++;
                 }
-            } else {
-                sPressed = false;  //Restablecemos al soltar la tecla
             }
+        }
+        return cantidadCeros;
 
-            //Cambia de nivel
-            if ((User32.INSTANCE.GetAsyncKeyState(LETRA_L) & 0x8000) != 0) {
-                //Si presionamos L llamada a funcion cambio cambioNivel
-                if (!lPressed) {
-                    //seleccionarNivel(2);
-                    opcion = "L";
-                    lPressed = true; //Ya se ha presionado
-                    break;
-                }
-            } else {
-                lPressed = false;  //Restablecemos al soltar la tecla
-            }
+    }
 
-            //Tecla 1
-            if ((User32.INSTANCE.GetAsyncKeyState(num1) & 0x8000) != 0) {
-                //Si presionamos 1 lleva a el nivel 1
-                if (!num1Pressed) {
-                    //seleccionarNivel(1);
-                    int nivel = 1;
-                    num1Pressed = true; //Ya se ha presionado
+    //Contador golpes
 
-                }
-            } else {
-                num1Pressed = false;  //Restablecemos al soltar la tecla
-            }
-            break;
+
+
+
+
+    //Comprobar seguimiento de partida.  Recibe cantidadceros de contadorCeros()
+    public static boolean enJuego(int ceros){
+        boolean juego = true;
+
+        if(ceros >= 36){
+            juego = false;
+        }
+
+        return juego;
+    }
+
+    //Mensajes de salida al terminar
+    public static void finJuego(boolean juego ){ //numero de golpes por entrada
+
+        if(!juego){
+            //SI hizo tantos golpes
+
 
         }
+
     }
 
 
@@ -287,36 +336,34 @@ public class Botones {
         int nivel = 6; // nivel se cambia con funcion cambioNivel
 
         //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
-
-
-        int [] [] tablero = crearTablero(seleccionarNivel(nivel));
+        int[][] tablero = crearTablero(seleccionarNivel(nivel));
         mostrarTablero(tablero);
-
+        System.out.println(contadorCeros(tablero));
 
         //LLamar a golpear
         int pos1 = 4;
         int pos2 = 3;
         golpear(tablero, pos1, pos2);
+        borrarPantalla(); // en cmd funciona
         mostrarTablero(tablero);
+        System.out.println(contadorCeros(tablero));
 
 
-
-
-
-            //INSTRUCCIONES B
-            System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel));      //DEVUELVA TAMBIEN "normal"
-            System.out.print("Instrucciones:\n" +
-                    "\tMueva el cursor a un botón del tablero (con las flechas).\n" +
-                    "\tPulse 'return'\n" +
-                    "\tpara decrementar el valor de ese botón en 1,\n" +
-                    "\ty también los valores de sus 4 vecinos.\n" +
-                    "Objetivo:\n" +
-                    "\tDejar todos los botones en '0'.");
-
+        //INSTRUCCIONES B
+        System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel));      //DEVUELVA TAMBIEN "normal"
+        System.out.print("Instrucciones:\n" +
+                "\tMueva el cursor a un botón del tablero (con las flechas).\n" +
+                "\tPulse 'return'\n" +
+                "\tpara decrementar el valor de ese botón en 1,\n" +
+                "\ty también los valores de sus 4 vecinos.\n" +
+                "Objetivo:\n" +
+                "\tDejar todos los botones en '0'.");
 
 
         //compruebaTeclas();
         System.out.println(seleccionarNivel(cambioNivel()));
+
+
 
 
 
@@ -338,7 +385,6 @@ public class Botones {
                 break;
             }
              */
-
 
 
     }
