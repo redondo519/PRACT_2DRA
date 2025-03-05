@@ -14,9 +14,16 @@ public class Botones {
 
 
     //Declaracion de variables
-    private static int numGolpes = 0;
-    private static int numCeros = 0;
-    private static int golpesPrevistos = 6;
+    private static int numGolpes = 0;           //Golpes que se han realizado
+    private static int numCeros = 0;            //Cantidad de 0s del tablero mostrado
+    private static int golpesPrevistos = 15;    //Golpes previstos para el nivel predeterminado (modifica en selecionarNivel())
+    private static int nivel = 6;               //Nivel por defecto
+    private static int corcheteX = 1;           //Posicion del corchete en el eje X (columnas)
+    private static int corcheteY = 1;           //Posicion del corchete en el eje Y (filas)
+    private static int [] golpesX = new int[0]; //array almacena posiciones donde hemos golpeado eje X
+    private static int [] golpesY = new int[0]; //array almacena posiciones donde hemos golpeado eje Y
+    private static int [][] tablero = new int[8][8]; //tablero inicial
+    private static Random r = new Random();     //Se utiliza en la creación del tablero.
 
 
     //Declaracion de integraciones de usuario
@@ -68,7 +75,7 @@ public class Botones {
 
 
 
-    //WINDOWS
+    //WINDOWS integración usuario
     public interface Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
         Kernel32 INSTANCE = (Kernel32) Native.load("user32", User32.class);
 
@@ -76,6 +83,234 @@ public class Botones {
         boolean GetAsyncKeyState(int vKey);
 
     }
+
+
+    //desarrollo del programa principal
+    public static void main(String[] args) {
+
+        String opcion = "A";
+        crearTablero(golpesPrevistos);
+        do{
+            //Limpiar pantalla al inicio
+            borrarPantalla();
+
+            //INSTRUCCIONES MENÚ
+            System.out.println("Nuevo ( N ) - Recomenzar ( R ) - Deshacer ( U ) - Salir ( S ) \n");
+
+            //mostrarTablero(crearTablero(golpesPrevistos));
+            mostrarTableroCorchete(corcheteX, corcheteY);
+
+            //INSTRUCCIONES
+            System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel) ) ;      //DEVUELVA TAMBIEN "normal"
+            System.out.print("Instrucciones:\n" +
+                    "\tMueva el cursor a un botón del tablero (con las flechas).\n" +
+                    "\tPulse 'return'\n" +
+                    "\tpara decrementar el valor de ese botón en 1,\n" +
+                    "\ty también los valores de sus 4 vecinos.\n" +
+                    "Objetivo:\n" +
+                    "\tDejar todos los botones en '0'.");
+
+            //Comprueba si el tablero esta a 0s
+            if (!enJuego(numCeros)){
+                //Si esta acabado, lanzo mensajes de  fin de juego
+                finJuego();
+            }else{ //No esta a 0s aun /Continuación juego
+
+                while(true){
+
+                    //TECLAS
+
+                    //flecha dercha
+                    if ((User32.INSTANCE.GetAsyncKeyState(VK_RIGHT) & 0x8000) != 0) {
+                        if (!rightPressed) { //Si esta pulsada
+                            corcheteX = moverRight(corcheteX); //llamamos a su funcion.
+                            break;
+                        }
+                    } else {
+                        rightPressed = false;  //Restablecemos al soltar la tecla
+                    }
+
+                    //flecha izquierda
+                    if ((User32.INSTANCE.GetAsyncKeyState(VK_LEFT) & 0x8000) != 0) {
+                        if (!leftPressed) {
+                            corcheteX = moverLeft(corcheteX); //llamamos a su funcion.
+                            break;
+                        }
+                    } else {
+                        leftPressed = false;  //Restablecemos al soltar la tecla
+                    }
+
+                    //flecha arriba
+                    if ((User32.INSTANCE.GetAsyncKeyState(VK_UP) & 0x8000) != 0) {
+                        if (!upPressed) {
+                            corcheteY = moverUP(corcheteY); //llamamos a su funcion.
+                            break;
+                        }
+                    } else {
+                        upPressed = false;
+                    }
+
+                    //flecha abajo
+                    if ((User32.INSTANCE.GetAsyncKeyState(VK_DOWN) & 0x8000) != 0) {
+                        if (!downPressed) {
+                            corcheteY = moverDown(corcheteY); //llamamos a su funcion
+                            break;
+                        }
+                    }else{
+                        downPressed = false;
+                    }
+
+                    //Enter
+                    if ((User32.INSTANCE.GetAsyncKeyState(VK_RETURN) & 0x8000) != 0) {
+                        if (!enterPressed) {
+                            golpear(); //llamamos a su funcion
+                            break;
+                        }
+                    }else{
+                        downPressed = false;
+                    }
+                    //letra S
+                    if ((User32.INSTANCE.GetAsyncKeyState(LETRA_S) & 0x8000) != 0) {
+                        if (!sPressed) {
+                            System.out.println("\nGracias por jugar\nFIN DEL PROGRAMA");
+                            opcion = "S";
+                            break;
+                        }
+                    }else{
+                        enterPressed = false;
+                    }
+
+
+
+
+
+
+
+                }//FIN while(true)
+
+            }//FIN else
+
+
+
+
+
+        }while(!opcion.equals("S")); //Bucle hasta presionar S
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    //GOLPES
+    //Metodo dar golpe
+    public static void golpear() {
+
+        numGolpes ++;
+        //Dar golpe en la posicion marcada con el cursor
+        tablero [corcheteX][corcheteY]  --;
+
+        //Sumar  a las casillas vecinas
+        tablero [corcheteX][corcheteY-1] ++;
+        tablero [corcheteX][corcheteY+1] ++;
+        tablero [corcheteX-1][corcheteY] ++;
+        tablero [corcheteX+1][corcheteY] ++;
+
+        //Comprobacion suma y resta correcta. Comprobación numero de 0s
+        for (int i = 1; i <= 6; i++) {
+            for (int j = 1; j <= 6; j++) {
+                if(tablero[i][j] == -1){
+                    tablero[i][j] = 3;
+                } else if (tablero[i][j] == 4) {
+                    tablero[i][j] = 0;
+                }else if (tablero[i][j] == 0) {
+                    numCeros++;
+                }
+            }
+        }
+
+        mostrarTablero(tablero);
+
+    }
+    //funcion deshacer movimiento. Vuelve al tablero antes de su ultimo golpe
+    public static void deshacer(int[][] tablero, int p1, int p2) {
+
+        if (numGolpes > 0){
+            //Dar un golpe positivo en la posicion dada.
+            tablero [p1][p2] ++;
+
+            //Restar a las casillas vecinas
+            tablero [p1][p2-1] --;
+            tablero [p1][p2+1] --;
+            tablero [p1-1][p2] --;
+            tablero [p1+1][p2] --;
+
+            //Comprobacion suma y resta correcta. Comprobación numero de 0s
+            for (int i = 1; i <= 6; i++) {
+                for (int j = 1; j <= 6; j++) {
+                    if(tablero[i][j] == -1){
+                        tablero[i][j] = 3;
+                    } else if (tablero[i][j] == 4) {
+                        tablero[i][j] = 0;
+                    }
+                }
+            }
+            mostrarTablero(tablero);
+        }
+
+    }
+
+    //METODOS FLECHAS
+
+    //mover arriba
+    public static int moverUP(int fila){
+        fila--; //Restamos en eje Y (subimos)
+
+        //Si supera la cima del tablero : vuelve a la zona mas baja
+        if(fila <1) {
+            fila = 6; //ultima posicion
+        }
+        return fila;
+
+    }
+    //mover abajo
+    public static int moverDown(int fila){
+        fila++; //Sumamos en eje Y (bajamos )
+        //Si superamos el final del tablero volvemos a la cima
+        if(fila > 6) {
+            fila = 1; //primera posicion
+        }
+        return fila;
+    }
+    //mover derecha
+    public static int moverRight(int columna){
+        columna++;
+        if(columna > 6) {
+            columna = 1;
+        }
+        return columna;
+    }
+    //mover izquierda
+    public static int moverLeft(int fila){
+        fila--;
+        if(fila <1) {
+            fila = 6;
+        }
+        return fila;
+    }
+
+
+
 
 
     //Comprueba entrada usuario
@@ -197,7 +432,7 @@ public class Botones {
     //funcion crear tablero, se le pasa el numero de golpes
     public static int[][] crearTablero(int numGolpesInicio) {
 
-        Random r = new Random();
+
 
         //arrray tablero 8 por 8 a CEROS
         int[][] tablero = new int[8][8];
@@ -241,6 +476,26 @@ public class Botones {
             System.out.println();
             for (int j = 1; j <= 6; j++) {
                 System.out.print(tablero[i][j] + " | ");
+
+            }
+            System.out.print("\n------------------------");
+        }
+        System.out.println("\n________________________");
+    }
+    //funcion mostrar tablero
+    public static void mostrarTableroCorchete(int fila, int columna) {
+
+        System.out.println("________________________\n");
+        System.out.print("------------------------");
+        for (int i = 1; i <= 6; i++) {
+            System.out.println();
+            for (int j = 1; j <= 6; j++) {
+                if(i == fila && j == columna){
+                    System.out.print("[" + tablero[i][j] +"]" + " | ");
+                }else{
+                    System.out.print(tablero[i][j] + " | ");
+                }
+
             }
             System.out.print("\n------------------------");
         }
@@ -288,65 +543,11 @@ public class Botones {
 
     }
 
-    //funcion deshacer movimiento. Vuelve al tablero antes de su ultimo golpe
-    public static int[][] deshacer(int[][] tablero, int p1, int p2) {
-        //Dar un golpe positivo en la posicion dada.
-        tablero [p1][p2] ++;
-
-        //Restar a las casillas vecinas
-        tablero [p1][p2-1] --;
-        tablero [p1][p2+1] --;
-        tablero [p1-1][p2] --;
-        tablero [p1+1][p2] --;
-
-        //Comprobacion suma y resta correcta. Comprobación numero de 0s
-        for (int i = 1; i <= 6; i++) {
-            for (int j = 1; j <= 6; j++) {
-                if(tablero[i][j] == -1){
-                    tablero[i][j] = 3;
-                } else if (tablero[i][j] == 4) {
-                    tablero[i][j] = 0;
-                }
-            }
-        }
-        mostrarTablero(tablero);
-
-        return tablero;
-
-    }
 
 
 
-    //Metodo dar golpe
-    public static int[][] golpear(int[][] tablero, int p1, int p2) {
 
-        numGolpes ++;
-        //Dar golpe en la posicion marcada con el cursor
-        tablero [p1][p2] --;
 
-        //Sumar  a las casillas vecinas
-        tablero [p1][p2-1] ++;
-        tablero [p1][p2+1] ++;
-        tablero [p1-1][p2] ++;
-        tablero [p1+1][p2] ++;
-
-        //Comprobacion suma y resta correcta. Comprobación numero de 0s
-        for (int i = 1; i <= 6; i++) {
-            for (int j = 1; j <= 6; j++) {
-                if(tablero[i][j] == -1){
-                    tablero[i][j] = 3;
-                } else if (tablero[i][j] == 4) {
-                    tablero[i][j] = 0;
-                }else if (tablero[i][j] == 0) {
-                    numCeros++;
-                }
-                }
-            }
-
-        mostrarTablero(tablero);
-
-        return tablero;
-    }
 
     //Metodo contador ceros
     public static int contadorCeros(int [][] tablero) {
@@ -373,10 +574,8 @@ public class Botones {
     }
 
     //Mensajes de salida al terminar
-    public static void finJuego(boolean juego ){ //numero de golpes por entrada
+    public static void finJuego(){ //numero de golpes por entrada
 
-        if(!juego){
-            //SI hizo tantos golpes
             if (numGolpes == golpesPrevistos ){
                 System.out.printf("\nPerfecto. Hecho en %d golpes.\n" , numGolpes);
             }else if(numGolpes > golpesPrevistos){
@@ -385,83 +584,9 @@ public class Botones {
                 System.out.printf("\nExtraordinariamente bien: Hecho en %d golpes.\n" , numGolpes);
             }
 
-        }
-
     }
 
 
-    //desarrollo del programa principal
-    public static void main(String[] args) {
 
-
-        //INSTRUCCIONES A
-        System.out.println("Nuevo ( N ) - Recomenzar ( R ) - Deshacer ( U ) - Salir ( S ) \n");
-
-
-        //Por defecto el nivel es el 6 - Normal de 15 golpes
-        int nivel = 6; // nivel se cambia con funcion cambioNivel
-
-        //LLamada a la funcion mostrarTablero (creatablero (num golpes nivel))
-        int[][] tablero = crearTablero(seleccionarNivel(nivel));
-        int [][] tableroCopia = copiaTablero(tablero);
-        mostrarTablero(tablero);
-        System.out.println(contadorCeros(tablero));
-        //mostrarTablero(tableroCopia);
-        //System.out.println(contadorCeros(tableroCopia));
-
-        //LLamar a golpear
-        int pos1 = 4;
-        int pos2 = 3;
-        golpear(tablero, pos1, pos2);
-        borrarPantalla(); // en cmd funciona
-        //mostrarTablero(tablero);
-        System.out.println(contadorCeros(tablero));
-        System.out.println();
-
-
-        //INSTRUCCIONES B
-        System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel));      //DEVUELVA TAMBIEN "normal"
-        System.out.print("Instrucciones:\n" +
-                "\tMueva el cursor a un botón del tablero (con las flechas).\n" +
-                "\tPulse 'return'\n" +
-                "\tpara decrementar el valor de ese botón en 1,\n" +
-                "\ty también los valores de sus 4 vecinos.\n" +
-                "Objetivo:\n" +
-                "\tDejar todos los botones en '0'.");
-
-
-        //compruebaTeclas();
-
-
-
-
-
-
-
-
-
-            /*
-            Scanner sc = new Scanner(System.in);
-            System.out.print("\n");
-            char letra = sc.next().toLowerCase().charAt(0);
-
-
-            if (letra == 'l'){
-                cambioNivel(letra);  // Guardar el nuevo nivel
-                mostrarTablero(crearTablero(seleccionarNivel(nivel))); // Actualizar el tablero con el nuevo nivel
-            } else if (letra == 'n') {
-                mostrarTablero(crearTablero(seleccionarNivel(6)));
-            }else if (letra == 's'){
-                break;
-            }
-             */
-
-
-
-
-
-
-
-    }
 
 }
