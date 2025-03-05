@@ -20,9 +20,9 @@ public class Botones {
     private static int nivel = 6;                       //Nivel por defecto
     private static int corcheteX = 1;                   //Posicion del corchete en el eje X (columnas)
     private static int corcheteY = 1;                   //Posicion del corchete en el eje Y (filas)
-    private static int [] golpesX = new int[0];         //array almacena posiciones donde hemos golpeado eje X
-    private static int [] golpesY = new int[0];         //array almacena posiciones donde hemos golpeado eje Y
-    private static int [][] tablero = new int[8][8];    //tablero inicial
+    private static int[] golpesX = new int[0];         //array almacena posiciones donde hemos golpeado eje X
+    private static int[] golpesY = new int[0];         //array almacena posiciones donde hemos golpeado eje Y
+    private static int[][] tablero = new int[8][8];    //tablero inicial
     private static int[][] tableroCopia;                //tablero para copiar
     private static Random r = new Random();             //Se utiliza en la creación del tablero.
 
@@ -40,15 +40,15 @@ public class Botones {
     public static final int VK_RIGHT = 0x27; //Tecla flecha derecha
     public static final int VK_RETURN = 0x0D;//Tecla enter
 
-    public static final int num1 = 0x31;
-    public static final int num2 = 0x32;
-    public static final int num3 = 0x33;
-    public static final int num4 = 0x34;
-    public static final int num5 = 0x35;
-    public static final int num6 = 0x36;
-    public static final int num7 = 0x37;
-    public static final int num8 = 0x38;
-    public static final int num9 = 0x39;
+    public static final int NUM1 = 0x31;
+    public static final int NUM2 = 0x32;
+    public static final int NUM3 = 0x33;
+    public static final int NUM4 = 0x34;
+    public static final int NUM5 = 0x35;
+    public static final int NUM6 = 0x36;
+    public static final int NUM7 = 0x37;
+    public static final int NUM8 = 0x38;
+    public static final int NUM9 = 0x39;
 
 
     //PRESSED  Incialmente FALSE porque no se han pulsado
@@ -75,7 +75,6 @@ public class Botones {
     private static boolean num9Pressed = false;
 
 
-
     //WINDOWS integración usuario
     public interface Kernel32 extends com.sun.jna.platform.win32.Kernel32 {
         Kernel32 INSTANCE = (Kernel32) Native.load("user32", User32.class);
@@ -90,8 +89,8 @@ public class Botones {
     public static void main(String[] args) {
 
         String opcion = "A";
-        crearTablero(golpesPrevistos);
-        do{
+        crearTableroCorchetes(golpesPrevistos);
+        do {
             //Limpiar pantalla al inicio
             borrarPantalla();
 
@@ -102,7 +101,7 @@ public class Botones {
             mostrarTableroCorchete(corcheteX, corcheteY);
 
             //INSTRUCCIONES
-            System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel) ) ;      //DEVUELVA TAMBIEN "normal"
+            System.out.printf("\n Nivel de juego ( L ) : %d\n ", seleccionarNivel(nivel));      //DEVUELVA TAMBIEN "normal"
             System.out.print("Instrucciones:\n" +
                     "\tMueva el cursor a un botón del tablero (con las flechas).\n" +
                     "\tPulse 'return'\n" +
@@ -112,12 +111,12 @@ public class Botones {
                     "\tDejar todos los botones en '0'.");
 
             //Comprueba si el tablero esta a 0s
-            if (!enJuego(numCeros)){
+            if (!enJuego(numCeros)) {
                 //Si esta acabado, lanzo mensajes de  fin de juego
                 finJuego();
-            }else{ //No esta a 0s aun /Continuación juego
+            } else { //No esta a 0s aun /Continuación juego
 
-                while(true){
+                while (true) {
 
                     //TECLAS
 
@@ -125,6 +124,7 @@ public class Botones {
                     if ((User32.INSTANCE.GetAsyncKeyState(VK_RIGHT) & 0x8000) != 0) {
                         if (!rightPressed) { //Si esta pulsada
                             corcheteX = moverRight(corcheteX); //llamamos a su funcion.
+                            rightPressed = true;
                             break;
                         }
                     } else {
@@ -135,6 +135,7 @@ public class Botones {
                     if ((User32.INSTANCE.GetAsyncKeyState(VK_LEFT) & 0x8000) != 0) {
                         if (!leftPressed) {
                             corcheteX = moverLeft(corcheteX); //llamamos a su funcion.
+                            leftPressed = true;
                             break;
                         }
                     } else {
@@ -145,6 +146,7 @@ public class Botones {
                     if ((User32.INSTANCE.GetAsyncKeyState(VK_UP) & 0x8000) != 0) {
                         if (!upPressed) {
                             corcheteY = moverUP(corcheteY); //llamamos a su funcion.
+                            upPressed = true;
                             break;
                         }
                     } else {
@@ -155,45 +157,199 @@ public class Botones {
                     if ((User32.INSTANCE.GetAsyncKeyState(VK_DOWN) & 0x8000) != 0) {
                         if (!downPressed) {
                             corcheteY = moverDown(corcheteY); //llamamos a su funcion
+                            downPressed = true;
                             break;
                         }
-                    }else{
+                    } else {
                         downPressed = false;
                     }
 
                     //Enter
                     if ((User32.INSTANCE.GetAsyncKeyState(VK_RETURN) & 0x8000) != 0) {
                         if (!enterPressed) {
-                            golpear(); //llamamos a su funcion
+                            golpear(corcheteY, corcheteX, numGolpes); //llamamos a su funcion
+                            enterPressed = true;
                             break;
                         }
-                    }else{
-                        downPressed = false;
+                    } else {
+                        enterPressed = false;
                     }
                     //letra S
                     if ((User32.INSTANCE.GetAsyncKeyState(LETRA_S) & 0x8000) != 0) {
                         if (!sPressed) {
                             System.out.println("\nGracias por jugar\nFIN DEL PROGRAMA");
                             opcion = "S";
+                            sPressed = true;
                             break;
                         }
-                    }else{
-                        enterPressed = false;
+                    } else {
+                        sPressed = false;
                     }
                     //letra R
                     if ((User32.INSTANCE.GetAsyncKeyState(LETRA_R) & 0x8000) != 0) {
                         if (!rPressed) {
-
+                            copiarTableroCorchete();
+                            rPressed = true;
                             break;
                         }
-                    }else{
-                        enterPressed = false;
+                    } else {
+                        rPressed = false;
                     }
+                    //letra L
+                    if ((User32.INSTANCE.GetAsyncKeyState(LETRA_L) & 0x8000) != 0) {
+                        if (!lPressed) {
+                            cambioNivel();
 
+                            while (true) {
+                                //Numero 1
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM1) & 0x8000) != 0) {
+                                    if (!num1Pressed) {
+                                        nivel = 1;
+                                        seleccionarNivel(nivel);
+                                        num1Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num1Pressed = false;
+                                }
+                                //Numero 2
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM2) & 0x8000) != 0) {
+                                    if (!num2Pressed) {
+                                        nivel = 2;
+                                        seleccionarNivel(nivel);
+                                        num2Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num2Pressed = false;
+                                }
+                                //Numero 3
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM3) & 0x8000) != 0) {
+                                    if (!num3Pressed) {
+                                        nivel = 3;
+                                        seleccionarNivel(nivel);
+                                        num3Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num3Pressed = false;
+                                }
+                                //Numero 4
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM4) & 0x8000) != 0) {
+                                    if (!num4Pressed) {
+                                        nivel = 4;
+                                        seleccionarNivel(nivel);
+                                        num4Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num4Pressed = false;
+                                }
+                                //Numero 5
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM5) & 0x8000) != 0) {
+                                    if (!num5Pressed) {
+                                        nivel = 5;
+                                        seleccionarNivel(nivel);
+                                        num5Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num5Pressed = false;
+                                }
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM6) & 0x8000) != 0) {
+                                    if (!num6Pressed) {
+                                        nivel = 6;
+                                        seleccionarNivel(nivel);
+                                        num6Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num6Pressed = false;
+                                }
+                                //Numero 7
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM7) & 0x8000) != 0) {
+                                    if (!num7Pressed) {
+                                        nivel = 7;
+                                        seleccionarNivel(nivel);
+                                        num7Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num7Pressed = false;
+                                }
+                                //Numero 8
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM8) & 0x8000) != 0) {
+                                    if (!num8Pressed) {
+                                        nivel = 8;
+                                        seleccionarNivel(nivel);
+                                        num8Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num8Pressed = false;
+                                }
+                                //Numero 9
+                                if ((User32.INSTANCE.GetAsyncKeyState(NUM9) & 0x8000) != 0) {
+                                    if (!num9Pressed) {
+                                        nivel = 9;
+                                        seleccionarNivel(nivel);
+                                        num8Pressed = true;
+                                        break;
+                                    }
+                                } else {
+                                    num9Pressed = false;
+                                }
 
+                            }//Fin while numeros
+                        }
+                    } else {
+                        sPressed = false;
+                    }
+                    //letra N
+                    if ((User32.INSTANCE.GetAsyncKeyState(LETRA_N) & 0x8000) != 0) {
+                        if (!nPressed) {
+                            crearTableroCorchetes(golpesPrevistos);
+                            nPressed = true;
+                            break;
+                        }
+                    } else {
+                        nPressed = false;
+                    }
+                    //Letra U
+                    if ((User32.INSTANCE.GetAsyncKeyState(LETRA_U) & 0x8000) != 0) {
+                        if (!uPressed) {
 
+                            if (numGolpes > 0) {
+                                deshacerGolpe();
+                                numGolpes--;
 
+                                if (numGolpes == 0) {
+                                    //Si es 0, no hay golpes, por lo que vacio los arrays
+                                    golpesX = new int[0];
+                                    golpesY = new int[0];
+                                } else {
+                                    //Creo array con un espacio menos
+                                    int[] nuevogolpesX = new int[numGolpes];
+                                    int[] nuevogolpesY = new int[numGolpes];
 
+                                    for (int i = 0; i < numGolpes; i++) {
+                                        nuevogolpesX[i] = golpesX[i];
+                                        nuevogolpesY[i] = golpesY[i];
+                                    }
+
+                                    //Reemplazo por los nuevos arrays
+                                    golpesX = nuevogolpesX;
+                                    golpesY = nuevogolpesY;
+                                }
+                            } else {
+                                System.out.println("No existen retrocesos posibles");
+                            }
+                            uPressed = true;
+                            break;
+                        }
+                    } else {
+                        uPressed = false;
+                    }
 
 
                 }//FIN while(true)
@@ -201,37 +357,21 @@ public class Botones {
             }//FIN else
 
 
+        } while (!opcion.equals("S")); //Bucle hasta presionar S
 
-
-
-        }while(!opcion.equals("S")); //Bucle hasta presionar S
-
-
-
-
-
-
-
-
-
-    }
-
-
-
-
-
+    }//FIN main
 
 
     //GOLPES
     //Metodo golpear
-    public static void golpear(int x, int y, int golpe){
+    public static void golpear(int x, int y, int golpe) {
 
         //Creamos dos arrays nuevos con una posicion mas
-        int[] nuevoGolpesX = new int[golpe +1];
-        int[] nuevoGolpesY = new int[golpe +1];
+        int[] nuevoGolpesX = new int[golpe + 1];
+        int[] nuevoGolpesY = new int[golpe + 1];
 
 
-        for(int i = 0; i < golpe; i++){
+        for (int i = 0; i < golpe; i++) {
             nuevoGolpesX[i] = golpesX[i];
             nuevoGolpesY[i] = golpesY[i];
         }
@@ -245,37 +385,37 @@ public class Botones {
         golpesY = nuevoGolpesY;
 
         //Aumentamos la varible contadora de golpes
-        numGolpes ++;
+        numGolpes++;
 
         //Dar golpe en la posicion marcada con el cursor
-        tablero [corcheteX][corcheteY]  --;
+        tablero[corcheteX][corcheteY]--;
 
         //Sumar  a las casillas vecinas
-        tablero [corcheteX][corcheteY-1] ++;
-        tablero [corcheteX][corcheteY+1] ++;
-        tablero [corcheteX-1][corcheteY] ++;
-        tablero [corcheteX+1][corcheteY] ++;
+        tablero[corcheteX][corcheteY - 1]++;
+        tablero[corcheteX][corcheteY + 1]++;
+        tablero[corcheteX - 1][corcheteY]++;
+        tablero[corcheteX + 1][corcheteY]++;
 
         //Comprobacion suma y resta correcta. Comprobación numero de 0s
         for (int i = 1; i <= 6; i++) {
             for (int j = 1; j <= 6; j++) {
-                if(tablero[i][j] == -1){
+                if (tablero[i][j] == -1) {
                     tablero[i][j] = 3;
                 } else if (tablero[i][j] == 4) {
                     tablero[i][j] = 0;
-                }else if (tablero[i][j] == 0) {
+                } else if (tablero[i][j] == 0) {
                     numCeros++;
                 }
             }
         }
 
 
-
     }
 
-    public static void copiarTableroCorchete(){
-        for(int i = 1; i < 6 ; i++){
-            for(int j = 1; j < 6 ; j++){
+    //Metodo copia del tablero para poder reiniciarlo
+    public static void copiarTableroCorchete() {
+        for (int i = 1; i < 6; i++) {
+            for (int j = 1; j < 6; j++) {
 
                 tablero[i][j] = tableroCopia[i][j];
             }
@@ -284,111 +424,73 @@ public class Botones {
     }
 
 
-    //Metodo dar golpe
-    /*public static void golpear() {
-
-        numGolpes ++;
-        //Dar golpe en la posicion marcada con el cursor
-        tablero [corcheteX][corcheteY]  --;
-
-        //Sumar  a las casillas vecinas
-        tablero [corcheteX][corcheteY-1] ++;
-        tablero [corcheteX][corcheteY+1] ++;
-        tablero [corcheteX-1][corcheteY] ++;
-        tablero [corcheteX+1][corcheteY] ++;
-
-        //Comprobacion suma y resta correcta. Comprobación numero de 0s
-        for (int i = 1; i <= 6; i++) {
-            for (int j = 1; j <= 6; j++) {
-                if(tablero[i][j] == -1){
-                    tablero[i][j] = 3;
-                } else if (tablero[i][j] == 4) {
-                    tablero[i][j] = 0;
-                }else if (tablero[i][j] == 0) {
-                    numCeros++;
-                }
-            }
-        }
-
-        mostrarTablero(tablero);
-
-    }*/
-
     //metodo deshacer a movimiento anterior
+    public static void deshacerGolpe() {
 
+        if (numGolpes > 0) {
+            //Buscamos en el array lel ultimo golpe dado
+            int fila = golpesY[numGolpes - 1];
+            int columna = golpesX[numGolpes - 1];
 
-    //funcion deshacer movimiento. Vuelve al tablero antes de su ultimo golpe
-    /*public static void deshacer(int[][] tablero, int p1, int p2) {
+            //Golpe a la inversa
+            //Dar golpe en la posicion marcada con el cursor
+            tablero[fila][columna]++;
 
-        if (numGolpes > 0){
-            //Dar un golpe positivo en la posicion dada.
-            tablero [p1][p2] ++;
+            //Sumar  a las casillas vecinas
+            tablero[fila][columna - 1]--;
+            tablero[fila][columna + 1]--;
+            tablero[fila - 1][columna]--;
+            tablero[fila + 1][columna]--;
 
-            //Restar a las casillas vecinas
-            tablero [p1][p2-1] --;
-            tablero [p1][p2+1] --;
-            tablero [p1-1][p2] --;
-            tablero [p1+1][p2] --;
-
-            //Comprobacion suma y resta correcta. Comprobación numero de 0s
-            for (int i = 1; i <= 6; i++) {
-                for (int j = 1; j <= 6; j++) {
-                    if(tablero[i][j] == -1){
-                        tablero[i][j] = 3;
-                    } else if (tablero[i][j] == 4) {
-                        tablero[i][j] = 0;
-                    }
-                }
-            }
-            mostrarTablero(tablero);
         }
-
-    }*/
+    }
 
 
     //METODOS FLECHAS
 
     //mover arriba
-    public static int moverUP(int fila){
+    public static int moverLeft(int fila) {
         fila--; //Restamos en eje Y (subimos)
 
         //Si supera la cima del tablero : vuelve a la zona mas baja
-        if(fila <1) {
+        if (fila < 1) {
             fila = 6; //ultima posicion
         }
         return fila;
 
     }
+
     //mover abajo
-    public static int moverDown(int fila){
+    public static int moverRight(int fila) {
         fila++; //Sumamos en eje Y (bajamos )
         //Si superamos el final del tablero volvemos a la cima
-        if(fila > 6) {
+        if (fila > 6) {
             fila = 1; //primera posicion
         }
         return fila;
     }
+
     //mover derecha
-    public static int moverRight(int columna){
+    public static int moverDown(int columna) {
         columna++;
-        if(columna > 6) {
+        if (columna > 6) {
             columna = 1;
         }
         return columna;
     }
+
     //mover izquierda
-    public static int moverLeft(int fila){
+    public static int moverUP(int fila) {
         fila--;
-        if(fila <1) {
+        if (fila < 1) {
             fila = 6;
         }
         return fila;
     }
 
 
-
     //Metodo borrar pantalla
-    public static void borrarPantalla(){
+    public static void borrarPantalla() {
         try {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         } catch (InterruptedException e) {
@@ -397,7 +499,6 @@ public class Botones {
             throw new RuntimeException(e);
         }
     }
-
 
 
     //Niveles de juego (hay 9) van en funcion de los golpes (3,6,9,10,12,15,18,20,27)
@@ -453,31 +554,7 @@ public class Botones {
     }
 
 
-    //funcion crear tablero, se le pasa el numero de golpes
-    public static int[][] crearTablero(int numGolpesInicio) {
-
-
-
-        //arrray tablero 8 por 8 a CEROS
-        int[][] tablero = new int[8][8];
-        for (int i = 1; i <= tablero.length - 1; i++) {
-            for (int j = 0; j <= tablero.length - 1; j++) {
-                tablero[i][j] = 0;
-            }
-        }
-        //suma en posiciones i,j random
-        for (int i = 0; i < numGolpesInicio; i++) {
-            //realiza tantas veces como golpes de nivel
-            int p1 = r.nextInt(1, 7);
-            int p2 = r.nextInt(1, 7);
-            tablero[p1][p2]++; //Golpe positivo en coordenada generada
-
-        }
-        return tablero; //Devuelve tablero
-
-    }
-
-    public static void crearTableroCorchetes(int golpesPrevistos){
+    public static void crearTableroCorchetes(int golpesPrevistos) {
         numGolpes = 0;
 
         //arrray tablero 8 por 8 a CEROS
@@ -498,31 +575,7 @@ public class Botones {
 
     }
 
-    //Copia del tablero para poder reiniciarlo al pulsar R
-    /*public static int[][] copiaTablero(int[][] tablero){
 
-        int[][] tableroR;
-        tableroR = tablero;
-
-        mostrarTablero(tableroR);
-        return tableroR;
-    }*/
-
-    //funcion mostrar tablero
-    /*public static void mostrarTablero(int[][] tablero) {
-
-        System.out.println("________________________\n");
-        System.out.print("------------------------");
-        for (int i = 1; i <= 6; i++) {
-            System.out.println();
-            for (int j = 1; j <= 6; j++) {
-                System.out.print(tablero[i][j] + " | ");
-
-            }
-            System.out.print("\n------------------------");
-        }
-        System.out.println("\n________________________");
-    }*/
     //funcion mostrar tablero
     public static void mostrarTableroCorchete(int fila, int columna) {
 
@@ -531,9 +584,9 @@ public class Botones {
         for (int i = 1; i <= 6; i++) {
             System.out.println();
             for (int j = 1; j <= 6; j++) {
-                if(i == fila && j == columna){
-                    System.out.print("[" + tablero[i][j] +"]" + " | ");
-                }else{
+                if (i == fila && j == columna) {
+                    System.out.print("[" + tablero[i][j] + "]" + " | ");
+                } else {
                     System.out.print(tablero[i][j] + " | ");
                 }
 
@@ -544,52 +597,17 @@ public class Botones {
     }
 
 
-
-    /*//funcion letras
-    public static void llamarFuncionesLetras(String letra){
-        switch (letra) {
-            case "L"->{
-                //cambioNivel();
-            }
-            case "N"->{
-                //crearTablero(seleccionarNivel(6));
-            }
-            case "R"->{
-                //llamar al tablero copia sin modificar y mostrarle;
-            }
-            case "S"->{
-                //llamar a funcion salir
-            }
-            case "U"->{
-                //llamar a funcion deshacer
-            }
-        }
-
-    }
-    */
-
     //funcion al pulsar  L  Cambio de nivel
     public static void cambioNivel() {
 
-        int nivel;
-
         Scanner sc2 = new Scanner(System.in);
         System.out.println("\nIntroduce el nivel que quieres jugar (1-9)");
-        //compruebaTeclas();
-        if (num1Pressed) {
-            seleccionarNivel(1);
-        } else {
-            seleccionarNivel(6);
-        }
 
     }
 
 
-
-
-
     //Metodo contador ceros
-    public static int contadorCeros(int [][] tablero) {
+    public static int contadorCeros(int[][] tablero) {
         return numCeros;
     }
 
@@ -599,13 +617,11 @@ public class Botones {
     }
 
 
-
-
     //Comprobar seguimiento de partida.  Recibe cantidadceros de contadorCeros()
-    public static boolean enJuego(int ceros){
+    public static boolean enJuego(int ceros) {
         boolean juego = true;
 
-        if(ceros >= 36){
+        if (ceros >= 36) {
             juego = false;
         }
 
@@ -613,19 +629,17 @@ public class Botones {
     }
 
     //Mensajes de salida al terminar
-    public static void finJuego(){ //numero de golpes por entrada
+    public static void finJuego() { //numero de golpes por entrada
 
-            if (numGolpes == golpesPrevistos ){
-                System.out.printf("\nPerfecto. Hecho en %d golpes.\n" , numGolpes);
-            }else if(numGolpes > golpesPrevistos){
-                System.out.printf("\nHecho en %d golpes.\n" , numGolpes);
-            }else{
-                System.out.printf("\nExtraordinariamente bien: Hecho en %d golpes.\n" , numGolpes);
-            }
+        if (numGolpes == golpesPrevistos) {
+            System.out.printf("\nPerfecto. Hecho en %d golpes.\n", numGolpes);
+        } else if (numGolpes > golpesPrevistos) {
+            System.out.printf("\nHecho en %d golpes.\n", numGolpes);
+        } else {
+            System.out.printf("\nExtraordinariamente bien: Hecho en %d golpes.\n", numGolpes);
+        }
 
     }
-
-
 
 
 }
