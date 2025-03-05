@@ -554,6 +554,7 @@ public class Botones {
     }
 
 
+    //CREAR TABLERO CORCHETES
     public static void crearTableroCorchetes(int golpesPrevistos) {
         numGolpes = 0;
 
