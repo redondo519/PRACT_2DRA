@@ -14,16 +14,17 @@ public class Botones {
 
 
     //Declaracion de variables
-    private static int numGolpes = 0;           //Golpes que se han realizado
-    private static int numCeros = 0;            //Cantidad de 0s del tablero mostrado
-    private static int golpesPrevistos = 15;    //Golpes previstos para el nivel predeterminado (modifica en selecionarNivel())
-    private static int nivel = 6;               //Nivel por defecto
-    private static int corcheteX = 1;           //Posicion del corchete en el eje X (columnas)
-    private static int corcheteY = 1;           //Posicion del corchete en el eje Y (filas)
-    private static int [] golpesX = new int[0]; //array almacena posiciones donde hemos golpeado eje X
-    private static int [] golpesY = new int[0]; //array almacena posiciones donde hemos golpeado eje Y
-    private static int [][] tablero = new int[8][8]; //tablero inicial
-    private static Random r = new Random();     //Se utiliza en la creación del tablero.
+    private static int numGolpes = 0;                   //Golpes que se han realizado
+    private static int numCeros = 0;                    //Cantidad de 0s del tablero mostrado
+    private static int golpesPrevistos = 15;            //Golpes previstos para el nivel predeterminado (modifica en selecionarNivel())
+    private static int nivel = 6;                       //Nivel por defecto
+    private static int corcheteX = 1;                   //Posicion del corchete en el eje X (columnas)
+    private static int corcheteY = 1;                   //Posicion del corchete en el eje Y (filas)
+    private static int [] golpesX = new int[0];         //array almacena posiciones donde hemos golpeado eje X
+    private static int [] golpesY = new int[0];         //array almacena posiciones donde hemos golpeado eje Y
+    private static int [][] tablero = new int[8][8];    //tablero inicial
+    private static int[][] tableroCopia;                //tablero para copiar
+    private static Random r = new Random();             //Se utiliza en la creación del tablero.
 
 
     //Declaracion de integraciones de usuario
@@ -179,6 +180,15 @@ public class Botones {
                     }else{
                         enterPressed = false;
                     }
+                    //letra R
+                    if ((User32.INSTANCE.GetAsyncKeyState(LETRA_R) & 0x8000) != 0) {
+                        if (!rPressed) {
+
+                            break;
+                        }
+                    }else{
+                        enterPressed = false;
+                    }
 
 
 
@@ -213,8 +223,69 @@ public class Botones {
 
 
     //GOLPES
+    //Metodo golpear
+    public static void golpear(int x, int y, int golpe){
+
+        //Creamos dos arrays nuevos con una posicion mas
+        int[] nuevoGolpesX = new int[golpe +1];
+        int[] nuevoGolpesY = new int[golpe +1];
+
+
+        for(int i = 0; i < golpe; i++){
+            nuevoGolpesX[i] = golpesX[i];
+            nuevoGolpesY[i] = golpesY[i];
+        }
+
+        //Nuevo golpe añadido
+        nuevoGolpesX[golpe] = x;
+        nuevoGolpesY[golpe] = y;
+
+        //Arrays reemplazados
+        golpesX = nuevoGolpesX;
+        golpesY = nuevoGolpesY;
+
+        //Aumentamos la varible contadora de golpes
+        numGolpes ++;
+
+        //Dar golpe en la posicion marcada con el cursor
+        tablero [corcheteX][corcheteY]  --;
+
+        //Sumar  a las casillas vecinas
+        tablero [corcheteX][corcheteY-1] ++;
+        tablero [corcheteX][corcheteY+1] ++;
+        tablero [corcheteX-1][corcheteY] ++;
+        tablero [corcheteX+1][corcheteY] ++;
+
+        //Comprobacion suma y resta correcta. Comprobación numero de 0s
+        for (int i = 1; i <= 6; i++) {
+            for (int j = 1; j <= 6; j++) {
+                if(tablero[i][j] == -1){
+                    tablero[i][j] = 3;
+                } else if (tablero[i][j] == 4) {
+                    tablero[i][j] = 0;
+                }else if (tablero[i][j] == 0) {
+                    numCeros++;
+                }
+            }
+        }
+
+
+
+    }
+
+    public static void copiarTableroCorchete(){
+        for(int i = 1; i < 6 ; i++){
+            for(int j = 1; j < 6 ; j++){
+
+                tablero[i][j] = tableroCopia[i][j];
+            }
+
+        }
+    }
+
+
     //Metodo dar golpe
-    public static void golpear() {
+    /*public static void golpear() {
 
         numGolpes ++;
         //Dar golpe en la posicion marcada con el cursor
@@ -241,9 +312,13 @@ public class Botones {
 
         mostrarTablero(tablero);
 
-    }
+    }*/
+
+    //metodo deshacer a movimiento anterior
+
+
     //funcion deshacer movimiento. Vuelve al tablero antes de su ultimo golpe
-    public static void deshacer(int[][] tablero, int p1, int p2) {
+    /*public static void deshacer(int[][] tablero, int p1, int p2) {
 
         if (numGolpes > 0){
             //Dar un golpe positivo en la posicion dada.
@@ -268,7 +343,8 @@ public class Botones {
             mostrarTablero(tablero);
         }
 
-    }
+    }*/
+
 
     //METODOS FLECHAS
 
@@ -309,58 +385,6 @@ public class Botones {
         return fila;
     }
 
-
-
-
-
-    //Comprueba entrada usuario
-    public static void compruebaTeclas() {
-        while (true) {
-
-            String opcion;
-
-            //Verifica si S esta presionada y aun no ha sido regristada
-            if ((User32.INSTANCE.GetAsyncKeyState(LETRA_S) & 0x8000) != 0) {
-                //Si presionamos S fin del programa
-                if (!sPressed) {
-                    System.out.println("\nGracias por jugar\nFIN DEL PROGRAMA");
-                    opcion = "S";
-                    sPressed = true; //Ya se ha presionado
-                    break;
-                }
-            } else {
-                sPressed = false;  //Restablecemos al soltar la tecla
-            }
-
-            //Verifica si L esta presionada y aun no ha sido registrada
-            if ((User32.INSTANCE.GetAsyncKeyState(LETRA_L) & 0x8000) != 0) {
-                //Si presionamos L llamada a funcion cambio cambioNivel
-                if (!lPressed) {
-                    //seleccionarNivel(2);
-                    opcion = "L";
-                    lPressed = true; //Ya se ha presionado
-                    break;
-                }
-            } else {
-                lPressed = false;  //Restablecemos al soltar la tecla
-            }
-
-            //Tecla 1
-            if ((User32.INSTANCE.GetAsyncKeyState(num1) & 0x8000) != 0) {
-                //Si presionamos 1 lleva a el nivel 1
-                if (!num1Pressed) {
-                    //seleccionarNivel(1);
-                    int nivel = 1;
-                    num1Pressed = true; //Ya se ha presionado
-
-                }
-            } else {
-                num1Pressed = false;  //Restablecemos al soltar la tecla
-            }
-            break;
-
-        }
-    }
 
 
     //Metodo borrar pantalla
@@ -453,22 +477,39 @@ public class Botones {
 
     }
 
+    public static void crearTableroCorchetes(int golpesPrevistos){
+        numGolpes = 0;
+
+        //arrray tablero 8 por 8 a CEROS
+        int[][] tablero = new int[8][8];
+        for (int i = 1; i <= tablero.length - 1; i++) {
+            for (int j = 0; j <= tablero.length - 1; j++) {
+                tablero[i][j] = 0;
+            }
+        }
+        //suma en posiciones i,j random
+        for (int i = 0; i < golpesPrevistos; i++) {
+            //realiza tantas veces como golpes de nivel
+            int p1 = r.nextInt(1, 7);
+            int p2 = r.nextInt(1, 7);
+            tablero[p1][p2]++; //Golpe positivo en coordenada generada
+
+        }
+
+    }
+
     //Copia del tablero para poder reiniciarlo al pulsar R
-    public static int[][] copiaTablero(int[][] tablero){
+    /*public static int[][] copiaTablero(int[][] tablero){
 
         int[][] tableroR;
         tableroR = tablero;
 
         mostrarTablero(tableroR);
         return tableroR;
-    }
-
-
-
-
+    }*/
 
     //funcion mostrar tablero
-    public static void mostrarTablero(int[][] tablero) {
+    /*public static void mostrarTablero(int[][] tablero) {
 
         System.out.println("________________________\n");
         System.out.print("------------------------");
@@ -481,7 +522,7 @@ public class Botones {
             System.out.print("\n------------------------");
         }
         System.out.println("\n________________________");
-    }
+    }*/
     //funcion mostrar tablero
     public static void mostrarTableroCorchete(int fila, int columna) {
 
@@ -504,7 +545,7 @@ public class Botones {
 
 
 
-    //funcion letras
+    /*//funcion letras
     public static void llamarFuncionesLetras(String letra){
         switch (letra) {
             case "L"->{
@@ -525,7 +566,7 @@ public class Botones {
         }
 
     }
-
+    */
 
     //funcion al pulsar  L  Cambio de nivel
     public static void cambioNivel() {
@@ -534,7 +575,7 @@ public class Botones {
 
         Scanner sc2 = new Scanner(System.in);
         System.out.println("\nIntroduce el nivel que quieres jugar (1-9)");
-        compruebaTeclas();
+        //compruebaTeclas();
         if (num1Pressed) {
             seleccionarNivel(1);
         } else {
@@ -542,8 +583,6 @@ public class Botones {
         }
 
     }
-
-
 
 
 
